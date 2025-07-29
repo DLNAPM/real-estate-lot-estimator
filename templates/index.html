@@ -4,15 +4,60 @@
   <meta charset="UTF-8">
   <title>Real Estate Lot Estimator</title>
   <style>
-    body { font-family: Arial; text-align: center; padding: 2rem; }
-    button { font-size: 1.2rem; padding: 1rem; margin-top: 2rem; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f8f9fa;
+    }
+    button {
+      font-size: 1.2rem;
+      padding: 1rem 2rem;
+      margin-top: 1.5rem;
+    }
+    #instructions {
+      max-width: 700px;
+      margin: 1.5rem auto;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    #instructions h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+    #instructions ul {
+      list-style: disc;
+      margin-left: 1.5rem;
+      text-align: left;
+    }
+    #status {
+      font-weight: bold;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
   <h1>Real Estate Lot Estimator App</h1>
+
+  <!-- 🔹 Instructions Section -->
+  <div id="instructions">
+    <h2>How to Use This App:</h2>
+    <ul>
+      <li>Click the <strong>Start</strong> button below.</li>
+      <li>The app will <strong>speak questions aloud</strong> using your computer speakers.</li>
+      <li>When prompted, <strong>wait a couple of seconds then speak your answers</strong> clearly into your microphone.</li>
+      <li>You'll be asked your name, your manager's name, lot size, zip code, and city.</li>
+      <li>After your responses, the app will <strong>calculate the estimated value</strong> of the lot and read it back to you.</li>
+      <li>Make sure your microphone is enabled and allowed by your browser.</li>
+    </ul>
+  </div>
+
   <button onclick="startApp()">Start</button>
   <p id="status"></p>
-
+ 
   <script>
     const synth = window.speechSynthesis;
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -66,7 +111,7 @@
       })
       .then(response => response.json())
       .then(data => {
-        const estimateText = `The estimated value of the lot in ${data.city}, ${data.zipCode} is $${data.estimate}`;
+        const estimateText = `So ${name}, of ${manager}'s Team, we have your results.  The estimated value of the lot in ${data.city}, ${data.zipCode} is $${data.estimate} using the Estimate Multiplier of $127 per square foot rate.`;
         document.getElementById("status").innerText = estimateText;
         speak(estimateText);
       });
@@ -76,6 +121,7 @@
       answers = [];
       askQuestion(0);
     }
+
   </script>
 </body>
 </html>
