@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real Estate Lot Estimator</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 2rem; }
+    button { font-size: 1.2rem; padding: 1rem; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>Real Estate Lot Estimator App</h1>
+  <button onclick="startApp()">Start</button>
+  <p id="status"></p>
+
+  <script>
+    const synth = window.speechSynthesis;
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+
+    const questions = [
+      "Welcome to the Real Estate Lot Estimator App. What is your name?",
+      "What is your manager's name?",
+      "What is the size of the lot you want estimated?",
+      "What is the zip code of the lot?",
+      "In what city is the lot located?"
+    ];
+
+    let answers = [];
+
+    function speak(text, callback) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.onend = callback;
+      synth.speak(utter);
+    }
+
+    function askQuestion(i) {
+      if (i < questions.length) {
+        speak(questions[i], () => {
+          recognition.start();
+        });
+
+        recognition.onresult = (event) => {
+          const response = event.results[0][0].transcript;
+          answers.push(response);
+          document.getElementById("status").innerText = `${questions[i]}: ${response}`;
+          speak(`You said: ${response}`, () => {
+            askQuestion(i + 1);
+          });
+        };
+
+        recognition.onerror = () => {
+          speak("Sorry, I didn't catch that. Please repeat.", () => askQuestion(i));
+        };
+      } else {
+        submitEstimate();
+      }
+    }
+
+    function submitEstimate() {
+      const [name, manager, lotSize, zipCode, city] = answers;
+      fetch("/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, manager, lotSize, zipCode, city })
+      })
+      .then(response => response.json())
+      .then(data => {
+        const estimateText = `The estimated value of the lot in ${data.city}, ${data.zipCode} is $${data.estimate}`;
+        document.getElementById("status").innerText = estimateText;
+        speak(estimateText);
+      });
+    }
+
+    function startApp() {
+      answers = [];
+      askQuestion(0);
+    }
+  </script>
+</body>
+</html>
